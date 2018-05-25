@@ -1,0 +1,63 @@
+version:                   '3.3'
+
+services:
+  mariadb:
+      image: mysql:5.6.37
+      expose:
+        - 3306
+      environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: jazzy-wallboard
+        MYSQL_USER: dbuser
+        MYSQL_PASSWORD: dbpass
+      networks:
+        - microservices
+      volumes:
+        - ./mariadb-data:/var/lib/mysql
+
+
+  jazzy-wallboard:
+    image:                 jzwallboard
+    build:
+      context: ../
+      args:
+        - ENVIRONMENT=dev
+    environment:
+      DATABASE_HOST:       mariadb
+      DATABASE_NAME:       jazzy-wallboard
+      DATABASE_USER:       dbuser
+      DATABASE_PASSWORD:   dbpass
+      VIRTUAL_HOST:        api.jazzy-wallboard.com
+    volumes:
+      - ..:/var/www/service
+    expose:
+      - 80
+      - 443
+      - 9501
+    networks:
+      - microservices
+    ports:
+      - "8080:80"
+      - "8043:443"
+      - "8044:9501"
+
+
+    depends_on:
+      - mariadb
+
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - 8000:80
+    networks:
+      - microservices
+    environment:
+       PMA_HOST: mariadb
+       MYSQL_USER: root
+       MYSQL_PASSWORD: root
+       MYSQL_ROOT_PASSWORD: root
+
+networks:
+  microservices:
+    driver:                bridge

@@ -1,0 +1,5 @@
+AppBundle\Entity\Webhook:
+    webhook{1..2}:
+      webhookId (unique): <numberBetween(1, 100)>
+      url: <url()>
+      project: '@project*'

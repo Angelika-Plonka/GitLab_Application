@@ -1,0 +1,6 @@
+AppBundle\Entity\Pipeline:
+    pipeline{1..20}:
+      pipelineId: <current()>
+      project: '@project<current()>'
+      status: <word()>
+      duration: <randomDigitNotNull()>

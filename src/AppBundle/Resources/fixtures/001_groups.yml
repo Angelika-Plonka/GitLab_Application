@@ -1,0 +1,4 @@
+AppBundle\Entity\Groups:
+    groups{1..20}:
+      groupId (unique): <numberBetween(1, 20)>
+      name: <word()>

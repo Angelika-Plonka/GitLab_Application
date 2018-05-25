@@ -1,0 +1,146 @@
+image:                 jazzypro/ubuntu-dind
+stages:
+  - build
+  - test
+  - deploy
+  - failure_log
+  - cleanup
+
+variables:
+  DOCKER_IMAGE_NAME:   jz-internal/jazzy-wallboard-backend
+  DOCKER_REGISTRY:     git.jazzy.pro:4567
+
+before_script:
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $DOCKER_REGISTRY
+
+
+
+
+test:dev:
+  stage:               test
+  only:
+    - /^dev-.*$/
+  tags:
+    - docker
+  coverage:            '/^\s*Lines:\s*\d+.\d+\%/'
+  script:
+    - docker build -t build$CI_COMMIT_REF_NAME --build-arg ENVIRONMENT=dev .
+    - docker-compose -f docker/docker-compose-ci.yml up -d
+    - docker-compose -f docker/docker-compose-ci.yml exec -T jazzy-wallboard bin/console c:c -e test
+  #  - docker-compose -f docker/docker-compose-ci.yml exec -T user-service ./vendor/bin/analyse_code jca-config.yml
+
+deploy:test:dev:
+  stage:               deploy
+  script:
+  - make deploy
+  when:                manual
+  only:
+    - /^dev-.*$/
+  tags:
+    - docker
+  script:
+    - docker build -t build$CI_COMMIT_REF_NAME --build-arg ENVIRONMENT=dev .
+    - docker tag build$CI_COMMIT_REF_NAME $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME/dev:$CI_COMMIT_REF_NAME
+    - docker push $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME/dev:$CI_COMMIT_REF_NAME
+
+
+build:master:latest:
+  stage:               build
+  only:
+    - master
+  tags:
+    - docker
+  script:
+    - docker build -t build$CI_COMMIT_REF_NAME --build-arg ENVIRONMENT=dev .
+    - docker tag build$CI_COMMIT_REF_NAME $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME:master
+
+
+test:master:latest:
+  stage:               test
+  image:               jazzypro/ubuntu-dind
+  only:
+    - master
+  tags:
+    - docker
+  dependencies:
+    - build:master:latest
+  coverage:            '/^\s*Lines:\s*\d+.\d+\%/'
+  script:
+    - docker-compose -f docker/docker-compose-ci.yml up -d
+    - docker-compose -f docker/docker-compose-ci.yml exec -T jazzy-wallboard bin/console c:c -e test
+  #  - docker-compose -f docker/docker-compose-ci.yml exec -T user-service ./vendor/bin/analyse_code jca-config.yml
+
+deploy:master:latest:
+  stage:               deploy
+  only:
+    - master
+  tags:
+    - docker
+  environment:         master/lastest
+  dependencies:
+    - build:master:latest
+  script:
+    - docker push $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME:master
+
+
+build:master:tag:
+  stage:               build
+  only:
+    - /^(\d+\.\d+\.\d+)$/
+  except:
+    - branches
+  tags:
+    - docker
+  environment:         master/$CI_COMMIT_REF_NAME
+  script:
+    - docker build -t build$CI_COMMIT_REF_NAME .
+    - docker tag build$CI_COMMIT_REF_NAME $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME:$CI_COMMIT_REF_NAME
+
+test:master:tag:
+  stage:               test
+  only:
+    - /^(\d+\.\d+\.\d+)$/
+  tags:
+    - docker
+  except:
+    - branches
+  dependencies:
+    - build:master:latest
+  coverage:            '/^\s*Lines:\s*\d+.\d+\%/'
+  script:
+    - docker build -t build$CI_COMMIT_REF_NAME --build-arg ENVIRONMENT=dev .
+    - docker-compose -f docker/docker-compose-ci.yml up -d
+    - docker-compose -f docker/docker-compose-ci.yml exec -T jazzy-wallboard bin/console c:c -e test
+    #- docker-compose -f docker/docker-compose-ci.yml exec -T user-service ./vendor/bin/analyse_code jca-config.yml
+
+deploy:master:tag:
+  stage:               deploy
+  only:
+    - /^(\d+\.\d+\.\d+)$/
+  except:
+    - branches
+  tags:
+    - docker
+  environment:         master/lastest
+  dependencies:
+    - build:master:latest
+  script:
+    - docker push $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME:$CI_COMMIT_REF_NAME
+
+show-failures:
+  stage:               failure_log
+  tags:
+    - docker
+  script:
+    - docker-compose -f docker/docker-compose-ci.yml ps
+    - docker-compose -f docker/docker-compose-ci.yml logs
+  when:                on_failure
+
+docker-cleanup:
+  stage:               cleanup
+  tags:
+    - docker
+  script:
+    - docker-compose -f docker/docker-compose-ci.yml down
+  when:                always
+  allow_failure:       true

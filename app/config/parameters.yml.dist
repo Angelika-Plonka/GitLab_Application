@@ -1,0 +1,32 @@
+# This file is a "template" of what your parameters.yml file should look like
+# Set parameters here that may be different on each deployment target of the app, e.g. development, staging, production.
+# https://symfony.com/doc/current/best_practices/configuration.html#infrastructure-related-configuration
+parameters:
+    database_host: 127.0.0.1
+    database_port: ~
+    database_name: symfony
+    database_user: root
+    database_password: ~
+    secret: f84d71db4dd10f3bef527f77b0df6cd2057397d4
+    env(DATABASE_HOST): mariadb
+    env(DATABASE_PORT): 3306
+    env(DATABASE_NAME): jazzy-wallboard
+    env(DATABASE_USER): dbuser
+    env(DATABASE_PASSWORD): dbpass
+    env(WEBHOOK_CALLBACK_URL): 'http://188.123.222.180:8090/app_dev.php/webhooks'
+    env(GITLAB_URL): 'https://git.jazzy.pro/api/v4/'
+    env(MSERVICE_NAME): YourService
+    env(MSERVICE_NOTIFICATION_SCOPES): 'USER, ADMIN, BET'
+    env(MSERVICE_NOTIFICATION_CALLBACK_URL): 'http://url'
+    env(MSERVICE_NOTIFICATION_REGISTRATION_URL): 'http://url'
+    env(MSERVICE_NOTIFICATION_DEREGISTRATION_URL): 'http://url'
+    env(USER_SERVICE_URL): 'http://url'
+    env(SECRET): ThisTokenIsNotSoSecretChangeIt
+
+    mailer_transport: smtp
+    mailer_host: 127.0.0.1
+    mailer_user: ~
+    mailer_password: ~
+
+    # A secret key that's used to generate certain security-related tokens
+    secret: ThisTokenIsNotSoSecretChangeIt

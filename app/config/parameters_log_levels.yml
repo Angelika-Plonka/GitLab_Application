@@ -1,0 +1,5 @@
+parameters:
+    symfony_log_level_prod: warning
+    symfony_log_level_dev: debug
+    symfony_log_level_worker: warning
+    symfony_log_level_worker_dev: debug

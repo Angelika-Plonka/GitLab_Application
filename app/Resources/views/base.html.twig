@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>{% block title %}GitLab API Projects{% endblock %}</title>
+        <link rel="stylesheet" type="text/css" href="{{ asset('assets/bootstrap-4.0.0-dist/css/bootstrap.css') }}"/>
+
+        <link rel="icon" type="image/x-icon" href="{{ asset('assets/favicon.ico') }}" />
+        {% block stylesheets %}{% endblock %}
+    </head>
+    <body class="container">
+        <nav class="navbar navbar-expand-lg" style="background-color: #CBE7FB; margin-bottom: 20px">
+            <a class="navbar-brand" href="{{ path('admin')}}">Główna</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-item nav-link active" href="{{ path('projects')}}">Projekty <span class="sr-only">(current)</span></a>
+                </div>
+            </div>
+        </nav>
+
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="flash-{{ label }}" style="text-align: center;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+    {% block content %}{% endblock %}
+
+        <div id="footer" style="margin-top: 40px;">
+            <div class="fixed-bottom container" style="background-color: #CBE7FB; height: 25px">
+                <p class="text-center">© 2018 Angelika Płonka:</p>
+            </div>
+        </div>
+
+        {% block javascripts %}
+            <script src="{{ asset('assets/jquery-3.3.1.min.js') }}"></script>
+            <script src="{{ asset('assets/bootstrap-4.0.0-dist/js/bootstrap.js') }}"></script>
+        {% endblock %}
+    </body>
+</html>

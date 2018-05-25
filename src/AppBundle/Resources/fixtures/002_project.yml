@@ -1,0 +1,6 @@
+AppBundle\Entity\Project:
+    project{1..20}:
+      projectId (unique): <current()>
+      group: '@groups*'
+      name: <word()>
+      deleted: false

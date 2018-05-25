@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+
+    <div>
+        <h3>Lista projektów</h3>
+
+        <table class="table">
+            <tr>
+                <th>LP</th>
+                <th>ID PROJEKTU</th>
+                <th>NAZWA PROJEKTU</th>
+                <th>NAZWA GRUPY</th>
+                {% if app.environment == 'dev' %}
+                    <th>WEBHOOK</th>
+                {% endif %}
+            </tr>
+
+            {% for elem in projects %}
+                {% set counter = (counter | default(0)) + 1 %}
+
+                <tr>
+                    <td>{{ counter }}</td>
+                    <td>{{ elem.projectId }}</td>
+                    <td>{{ elem.name }}</td>
+
+                    {% if elem.group %}
+                        <td>{{ elem.group.name }}</td>
+                    {% else %}
+                        <td>nie przypisano do grupy</td>
+                    {% endif %}
+
+                    {% if app.environment == 'dev' %}
+                        {% if elem.name == 'jazzy-wallboard-backend' %}
+                            <td>
+                                <form method="post">
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <input type="hidden" name="removeProjectID" value="{{ elem.projectId }}"/>
+                                    <button type="submit" class="btn btn-primary">USUŃ</button>
+                                </form>
+
+                                <form method="post">
+                                    <input type="hidden" name="addProjectID" value="{{ elem.projectId }}"/>
+                                    <button type="submit" class="btn btn-primary">DODAJ</button>
+                                </form>
+                            </td>
+                        {% endif %}
+                    {% endif %}
+
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+{% endblock %}
